@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Чат-бот-продавец для «Это Питер Деткам»</title>
+<meta name="description" content="Бот отвечает в ВК, на сайте и в Telegram, подбирает экскурсию, доводит до записи и собирает КП для школьного класса. Что нужно от компании, сроки и смета.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Чат-бот-продавец для «Это Питер Деткам»">
+<meta property="og:description" content="Отвечает в ВК, на сайте и в Telegram от лица компании. Подбирает экскурсию из 51 программы, доводит до записи, собирает КП для класса. Смета ~900 ₽/мес, срок 5–6 недель.">
+<meta property="og:image" content="https://t2754445-debug.github.io/piterd-bot/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=PT+Mono&display=swap" rel="stylesheet">
+<style>
+:root{
+  --turq:#0e8f8f;        /* читаемая бирюза для текста */
+  --turq-br:#52d2d2;     /* фирменная, для плашек и кнопок */
+  --turq-d:#0a7676;
+  --turq-soft:#e3f6f5;
+  --green:#2fa84f;
+  --green-br:#79e88e;
+  --green-soft:#eafaee;
+  --ink:#111111;
+  --ink-2:#37403f;
+  --line:#d8dede;
+  --bg-soft:#f2f7f7;
+  --mono:'PT Mono',"Courier New",Courier,monospace;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;background:#fff;color:var(--ink);
+  font-family:var(--mono);font-size:15px;line-height:1.7;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1000px;margin:0 auto;padding:0 20px}
+h1,h2,h3{font-family:var(--mono);font-weight:400;margin:0;line-height:1.3;color:var(--ink)}
+h1{font-size:clamp(25px,4.2vw,42px)}
+h2{font-size:clamp(21px,3vw,30px)}
+h3{font-size:18px}
+p{margin:0 0 14px}
+b,strong{font-weight:700}
+a{color:var(--turq)}
+section{padding:58px 0}
+section+section{border-top:1px solid var(--line)}
+.up{font-size:13px;color:var(--turq);letter-spacing:.07em;text-transform:uppercase;margin-bottom:12px}
+.lead{font-size:16px;color:var(--ink-2)}
+.sub{color:var(--ink-2)}
+.grid{display:grid;gap:16px}
+.g2{grid-template-columns:repeat(2,1fr)}
+.g3{grid-template-columns:repeat(3,1fr)}
+.g4{grid-template-columns:repeat(4,1fr)}
+
+.btn{display:inline-block;border:0;cursor:pointer;text-decoration:none;font-family:var(--mono);
+     font-size:13px;letter-spacing:.06em;text-transform:uppercase;padding:12px 22px;border-radius:26px;transition:.15s}
+.btn-t{background:var(--turq);color:#fff}
+.btn-t:hover{background:var(--turq-d)}
+.btn-g{background:var(--green);color:#fff}
+.btn-g:hover{background:#268a41}
+.btn-o{background:#fff;color:var(--ink);border:1px solid var(--ink)}
+.btn-o:hover{background:var(--bg-soft)}
+.btn:active{transform:translateY(1px)}
+
+header{position:sticky;top:0;z-index:50;background:#fff;border-bottom:1px solid var(--line)}
+.bar{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:11px 0}
+.logo{display:flex;align-items:center;gap:9px;font-size:14px}
+.logo .dot{width:30px;height:30px;border-radius:50%;background:var(--turq-br);color:#fff;display:grid;place-items:center}
+.nav{display:flex;gap:16px;font-size:13px}
+.nav a{color:var(--ink-2);text-decoration:none}
+.nav a:hover{color:var(--turq)}
+@media(max-width:900px){.nav{display:none}}
+
+.hero{padding:50px 0 42px}
+.hero h1{margin-bottom:18px}
+.hero .lead{max-width:650px}
+.herostrip{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:30px}
+.herostrip img{width:100%;height:150px;object-fit:cover;display:block}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:10px}
+.stat{background:var(--bg-soft);padding:15px 18px}
+.stat b{display:block;font-size:26px;color:var(--turq);font-weight:400}
+.stat span{font-size:13px;color:var(--ink-2)}
+
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:26px}
+.exc img{width:100%;height:190px;object-fit:cover;display:block}
+.exc .date{font-size:13px;color:var(--ink-2);margin:13px 0 5px}
+.exc .name{font-size:17px;color:var(--turq);line-height:1.35;margin-bottom:7px}
+.exc .txt{font-size:14px;color:var(--ink-2);margin-bottom:13px}
+.exc .btns{display:flex;flex-direction:column;gap:8px;align-items:flex-start}
+
+.box{border:1px solid var(--line);padding:20px}
+.box.soft{background:var(--bg-soft);border-color:transparent}
+.box.acc{border:2px solid var(--turq-br);background:var(--turq-soft)}
+.box h3{margin-bottom:8px}
+.box p{margin:0;font-size:14px;color:var(--ink-2)}
+
+.flow{display:grid;grid-template-columns:1fr 1.1fr 1fr;gap:16px;align-items:center}
+.flow .col{display:grid;gap:9px}
+.chan{border:1px solid var(--line);padding:11px 14px;font-size:14px}
+.chan span{color:var(--ink-2)}
+.core{background:var(--turq);color:#fff;padding:24px 20px;text-align:center}
+.core b{display:block;font-size:18px;font-weight:400;margin-bottom:10px}
+.core small{font-size:13.5px;line-height:1.65;display:block}
+.out{background:var(--green-soft);border:1px solid #bde8c8;padding:11px 14px;font-size:13.5px;color:#1e7a38}
+@media(max-width:900px){.flow{grid-template-columns:1fr}}
+
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+.tab{font-family:var(--mono);font-size:13px;text-transform:uppercase;letter-spacing:.05em;
+     border:1px solid var(--line);background:#fff;color:var(--ink-2);padding:10px 18px;border-radius:26px;cursor:pointer}
+.tab.on{background:var(--ink);border-color:var(--ink);color:#fff}
+.phone{max-width:470px;margin:0 auto;background:var(--bg-soft);padding:16px;border:1px solid var(--line)}
+.chat{min-height:340px;display:flex;flex-direction:column;gap:9px;justify-content:flex-end}
+.msg{max-width:86%;padding:10px 14px;font-size:14px;line-height:1.5;white-space:pre-line;animation:pop .26s ease both}
+.msg.them{align-self:flex-start;background:#fff;border:1px solid var(--line)}
+.msg.me{align-self:flex-end;background:var(--turq);color:#fff}
+.msg.sys{align-self:center;background:var(--green-soft);color:#1e7a38;font-size:12.5px;text-align:center}
+.msg.file{align-self:flex-start;background:#fff;border:1px dashed var(--turq);color:var(--turq);font-size:13.5px}
+@keyframes pop{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+/* ── документы ── */
+.docs{width:100%;border-collapse:collapse;font-size:14px;margin-top:22px}
+.docs th,.docs td{text-align:left;padding:12px;border:1px solid var(--line);vertical-align:top}
+.docs th{background:var(--ink);color:#fff;font-size:12px;letter-spacing:.06em;text-transform:uppercase;font-weight:400}
+.docs td:first-child{white-space:nowrap}
+.docs .who{color:var(--ink-2)}
+.tag{display:inline-block;font-size:11px;letter-spacing:.04em;text-transform:uppercase;padding:3px 9px;border-radius:20px;white-space:nowrap}
+.tag.you{background:#ffe2d9;color:#b03a19}
+.tag.me{background:var(--turq-soft);color:var(--turq-d)}
+.tag.auto{background:var(--green-soft);color:#1e7a38}
+
+details.doc{border:1px solid var(--line);margin-bottom:10px;background:#fff}
+details.doc[open]{border-color:var(--turq-br)}
+details.doc summary{
+  cursor:pointer;padding:15px 18px;list-style:none;display:flex;gap:12px;align-items:baseline;flex-wrap:wrap;
+}
+details.doc summary::-webkit-details-marker{display:none}
+details.doc summary::after{content:'＋ подробнее';margin-left:auto;font-size:12px;color:var(--turq);white-space:nowrap}
+details.doc[open] summary::after{content:'− свернуть'}
+details.doc summary b{font-size:16px;font-weight:400}
+details.doc summary .cols{width:100%;font-size:13.5px;color:var(--ink-2);margin-top:4px}
+.docbody{padding:0 18px 18px;border-top:1px solid var(--line);margin-top:2px}
+.docbody table{width:100%;border-collapse:collapse;font-size:13.5px;margin-top:14px}
+.docbody th,.docbody td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+.docbody th{font-size:11.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-2);background:var(--bg-soft)}
+.docbody .ex{background:var(--bg-soft);padding:12px 14px;font-size:13px;margin-top:14px;overflow-x:auto;white-space:pre}
+.req{color:#b03a19}
+.tablewrap{overflow-x:auto}
+
+.cfg{display:grid;grid-template-columns:1fr 290px;gap:22px;align-items:start}
+@media(max-width:900px){.cfg{grid-template-columns:1fr}}
+.opt{display:flex;gap:12px;align-items:flex-start;border:1px solid var(--line);padding:13px 15px;cursor:pointer}
+.opt:hover{border-color:var(--turq)}
+.opt.lock{background:var(--bg-soft);border-color:transparent;cursor:default}
+.opt input{margin:3px 0 0;width:17px;height:17px;accent-color:var(--turq);flex:0 0 auto}
+.opt .t{flex:1;font-size:13.5px;color:var(--ink-2)}
+.opt .t b{display:block;font-weight:400;color:var(--ink);font-size:15px}
+.opt .d{font-size:12.5px;color:var(--turq);white-space:nowrap}
+.sum{position:sticky;top:74px;background:var(--ink);color:#fff;padding:20px}
+.sum h3{color:#fff;font-size:15px;margin-bottom:12px;letter-spacing:.06em;text-transform:uppercase}
+.srow{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.2);font-size:13.5px}
+.srow b{font-weight:400}
+.slider{width:100%;accent-color:var(--turq-br);margin:8px 0 0}
+.big{font-size:30px;color:var(--turq-br);margin-top:4px}
+
+.step{display:grid;grid-template-columns:32px 1fr auto;gap:14px;border:1px solid var(--line);padding:13px 16px;margin-bottom:9px}
+.step .n{width:26px;height:26px;border-radius:50%;background:var(--turq-soft);color:var(--turq-d);display:grid;place-items:center;font-size:13px}
+.step b{display:block;font-weight:400;font-size:15px}
+.step .s{font-size:13.5px;color:var(--ink-2)}
+.step .w{font-size:12.5px;color:var(--turq);white-space:nowrap}
+
+.q{padding:17px 0;border-bottom:1px solid var(--line)}
+.q:last-child{border:0}
+.qt{display:block;font-size:15px;margin-bottom:10px}
+.qt em{font-style:normal;color:var(--ink-2);font-size:13px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{font-family:var(--mono);font-size:13.5px;border:1px solid var(--line);background:#fff;color:var(--ink-2);
+      padding:9px 16px;border-radius:26px;cursor:pointer}
+.chip:hover{border-color:var(--turq);color:var(--turq)}
+.chip.on{background:var(--turq);border-color:var(--turq);color:#fff}
+input[type=text],textarea{width:100%;font-family:var(--mono);font-size:14px;color:var(--ink);
+  border:1px solid var(--line);padding:12px 14px;background:#fff;resize:vertical}
+input[type=text]:focus,textarea:focus{outline:1px solid var(--turq);border-color:var(--turq)}
+.send{position:sticky;bottom:0;background:linear-gradient(to top,#fff 65%,rgba(255,255,255,0));padding:18px 0 22px}
+.sendrow{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.note{font-size:12.5px;color:var(--ink-2);line-height:1.6}
+.toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,14px);background:var(--ink);color:#fff;
+       padding:12px 20px;font-size:13.5px;opacity:0;pointer-events:none;transition:.2s;z-index:99}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+footer{padding:26px 0 44px;font-size:12.5px;color:var(--ink-2)}
+@media(max-width:820px){
+  .g2,.g3,.g4,.cards{grid-template-columns:1fr}
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .herostrip img{height:100px}
+  section{padding:40px 0}
+  .step{grid-template-columns:28px 1fr}
+  .step .w{grid-column:2}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap bar">
+    <div class="logo"><span class="dot">Э</span>ЭТО ПИТЕР ДЕТКАМ · ЧАТ-БОТ</div>
+    <nav class="nav">
+      <a href="#how">Как работает</a>
+      <a href="#demo">Демо</a>
+      <a href="#docs">Что нужно от вас</a>
+      <a href="#cfg">Состав</a>
+      <a href="#form">Анкета</a>
+    </nav>
+    <a href="#form" class="btn btn-t">Ответить</a>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="wrap">
+    <div class="up">Предложение · сентябрь 2026</div>
+    <h1>Бот, который доводит до записи,<br>пока менеджер ведёт экскурсию</h1>
+    <p class="lead">
+      Отвечает в ВК, на сайте и в Telegram от лица компании. Выясняет возраст ребёнка,
+      интерес и дату, подбирает программу из базы, даёт ссылку на запись.
+      Школьному классу собирает коммерческое предложение за минуту вместо вечера переписки.
+    </p>
+    <div class="herostrip">
+      <img src="img/petropavlovka.jpg" alt="Квест в Петропавловской крепости">
+      <img src="img/depo.jpg" alt="Депо метрополитена">
+      <img src="img/smeshariki.jpg" alt="В гостях у Смешариков">
+    </div>
+    <div class="stats">
+      <div class="stat"><b>51</b><span>программа в базе</span></div>
+      <div class="stat"><b>1118</b><span>фотографий</span></div>
+      <div class="stat"><b>24/7</b><span>ответ за 5 секунд</span></div>
+      <div class="stat"><b>~900 ₽</b><span>в месяц на всё</span></div>
+    </div>
+    <p class="note" style="margin-top:14px">
+      Основа написана и работает: база экскурсий, расписание, фотографии, подбор, заявки.
+      Остаётся развернуть её лицом к клиенту и подключить каналы.
+    </p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="up">Что происходит сейчас</div>
+    <h2>Где теряются заявки</h2>
+    <div class="grid g4" style="margin-top:22px">
+      <div class="box soft"><h3>Вечер и выходные</h3><p>Родители пишут после работы и в субботу. Ответ в понедельник — ребёнок уже записан в другом месте.</p></div>
+      <div class="box soft"><h3>Одно и то же</h3><p>Возраст, цена, адрес сбора, что взять. Менеджер отвечает это по сто раз в день вместо работы с группами.</p></div>
+      <div class="box soft"><h3>Школы ждут КП</h3><p>Учитель спросил — надо выяснить восемь вещей и посчитать руками. Пока считают, класс уходит.</p></div>
+      <div class="box soft"><h3>Каналы врозь</h3><p>ВК, сайт, телефон. История разговора нигде не сходится, клиент повторяет всё заново.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="how">
+  <div class="wrap">
+    <div class="up">Устройство</div>
+    <h2>Один бот, четыре входа</h2>
+    <p class="lead" style="max-width:650px;margin-top:10px">
+      Канал — только транспорт. База, логика и характер общения общие: клиент получит
+      одинаковый ответ, откуда бы ни написал.
+    </p>
+    <div class="flow" style="margin-top:26px">
+      <div class="col">
+        <div class="chan">ВК <span>— сообщения сообщества</span></div>
+        <div class="chan">Сайт <span>— виджет на piterd.ru</span></div>
+        <div class="chan">Telegram <span>— бот компании</span></div>
+        <div class="chan" style="opacity:.6">Авито, WhatsApp <span>— позже</span></div>
+      </div>
+      <div class="core">
+        <b>ЯДРО</b>
+        <small>51 программа · расписание · цены<br>правила · ответы на частые вопросы<br><br>
+        Понимает живой язык, уточняет недостающее,<br>не выдумывает цены и даты</small>
+      </div>
+      <div class="col">
+        <div class="out">→ ссылка на запись на конкретную дату</div>
+        <div class="out">→ КП для школы в PDF</div>
+        <div class="out">→ заявка менеджеру в Telegram</div>
+        <div class="out">→ напоминание клиенту за день</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="up">Что бот показывает клиенту</div>
+    <h2>Карточки — как на сайте</h2>
+    <p class="lead" style="max-width:640px;margin-top:10px">
+      Те же фотографии, те же формулировки, та же кнопка записи. Клиент не замечает перехода
+      между сайтом и перепиской.
+    </p>
+    <div class="cards" style="margin-top:26px">
+      <div class="exc">
+        <img src="img/petropavlovka.jpg" alt="">
+        <div class="date">04.10 в 11.00</div>
+        <div class="name">Экскурсия-квест по Петропавловской крепости 5+</div>
+        <div class="txt">Узнаем, откуда появился город, почему остров Заячий, и услышим выстрел легендарной пушки. 1450 ₽</div>
+        <div class="btns"><a class="btn btn-t" href="#demo">Записаться</a><a class="btn btn-g" href="#demo">Заказать для класса</a></div>
+      </div>
+      <div class="exc">
+        <img src="img/depo.jpg" alt="">
+        <div class="date">12.10 в 12.00</div>
+        <div class="name">Экскурсия в депо метрополитена 9+</div>
+        <div class="txt">Куда уезжают поезда ночью, как их моют и ремонтируют. Настоящее депо, а не музей. 3000 ₽</div>
+        <div class="btns"><a class="btn btn-t" href="#demo">Записаться</a><a class="btn btn-g" href="#demo">Заказать для класса</a></div>
+      </div>
+      <div class="exc">
+        <img src="img/doctor.jpg" alt="">
+        <div class="date">19.10 в 14.00</div>
+        <div class="name">Приём ведёт юный доктор 5+</div>
+        <div class="txt">Ролевая игра: дети в халатах слушают, перевязывают и ставят диагнозы. 1700 ₽</div>
+        <div class="btns"><a class="btn btn-t" href="#demo">Записаться</a><a class="btn btn-g" href="#demo">Заказать для класса</a></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="demo">
+  <div class="wrap">
+    <div class="up">Как это выглядит в переписке</div>
+    <h2>Два разговора</h2>
+    <div class="tabs" style="margin-top:18px">
+      <button class="tab on" data-demo="retail">Родитель</button>
+      <button class="tab" data-demo="school">Учитель, 3 класс</button>
+    </div>
+    <div class="phone"><div class="chat" id="chat"></div></div>
+    <div style="text-align:center;margin-top:14px"><button class="btn btn-o" id="replay">Проиграть заново</button></div>
+  </div>
+</section>
+
+<!-- ══ ДОКУМЕНТЫ ══ -->
+<section id="docs">
+  <div class="wrap">
+    <div class="up">Что нужно от вас</div>
+    <h2>Четыре таблицы и папка файлов</h2>
+    <p class="lead" style="max-width:700px;margin-top:10px">
+      Всё в одном Excel-файле, по листу на таблицу. Каркас со всеми колонками делаю я и заполняю тем,
+      что уже собрано с сайта: 51 программа, расписание, фотографии. Вы дописываете то,
+      чего нет нигде, кроме менеджеров.
+    </p>
+
+    <div class="tablewrap">
+    <table class="docs">
+      <thead><tr><th>Лист</th><th>Кто заполняет</th><th>Что делает бот с этими данными</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><b>1. Экскурсии</b></td>
+          <td class="who"><span class="tag me">каркас — я</span><br><span class="tag you">цены и что входит — вы</span></td>
+          <td>Подбирает под возраст и интерес, называет цену и что в неё входит, отправляет фото и ссылку</td>
+        </tr>
+        <tr>
+          <td><b>2. Расписание</b></td>
+          <td class="who"><span class="tag auto">с сайта автоматом</span><br><span class="tag you">отмены — вы</span></td>
+          <td>Говорит ближайшие даты, считает места, даёт ссылку на запись именно на эту дату</td>
+        </tr>
+        <tr>
+          <td><b>3. Группы и школы</b></td>
+          <td class="who"><span class="tag you">только вы</span></td>
+          <td>Считает стоимость на класс и собирает КП в PDF</td>
+        </tr>
+        <tr>
+          <td><b>4. Вопрос — ответ</b></td>
+          <td class="who"><span class="tag you">вы</span> <span class="tag me">черновик — я</span></td>
+          <td>Отвечает вашими словами на возвраты, болезни, документы, опоздания</td>
+        </tr>
+        <tr>
+          <td><b>Папка файлов</b></td>
+          <td class="who"><span class="tag you">вы</span></td>
+          <td>Вкладывает в КП, отправляет договор и реквизиты по запросу</td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+
+    <p class="note" style="margin:16px 0 26px">
+      Формат — Excel или Google Таблица, на ваш выбор. Google удобнее: правки видны боту сразу,
+      не надо пересылать файл. Бот перечитывает таблицу раз в час и пишет, что изменилось.
+    </p>
+
+    <!-- лист 1 -->
+    <details class="doc">
+      <summary>
+        <b>Лист 1 · Экскурсии</b>
+        <span class="cols">Название · Тип: сборная или для класса · Возраст · Цена · Что входит · Длительность · Адрес сбора · Ссылка на запись · Активна</span>
+      </summary>
+      <div class="docbody">
+        <table>
+          <thead><tr><th>Колонка</th><th>Что писать</th><th>Обязательно</th></tr></thead>
+          <tbody>
+            <tr><td>Название</td><td>как говорите клиенту, без SEO-хвостов</td><td class="req">да</td></tr>
+            <tr><td>Тип</td><td>сборная (набираем группу из разных семей) / для класса / и то и другое</td><td class="req">да</td></tr>
+            <tr><td>Возраст</td><td>от скольки лет, при желании — до</td><td class="req">да</td></tr>
+            <tr><td>Цена за ребёнка</td><td>числом: 1450</td><td class="req">да</td></tr>
+            <tr><td>Цена за взрослого</td><td>числом или «бесплатно»</td><td>желательно</td></tr>
+            <tr><td>Что входит</td><td>экскурсия, мастер-класс, чаепитие, материалы, билет в музей</td><td class="req">да</td></tr>
+            <tr><td>Длительность</td><td>2 часа</td><td>желательно</td></tr>
+            <tr><td>Адрес сбора</td><td>точка встречи и метро</td><td class="req">да</td></tr>
+            <tr><td>Ссылка на запись</td><td>Timepad или страница сайта</td><td class="req">да</td></tr>
+            <tr><td>Активна</td><td>да / нет — вместо удаления строки</td><td class="req">да</td></tr>
+            <tr><td>Что взять с собой</td><td>удобная обувь, вода</td><td>желательно</td></tr>
+            <tr><td>Максимум человек</td><td>25</td><td>можно потом</td></tr>
+          </tbody>
+        </table>
+        <div class="ex">Петропавловка-квест | сборная+класс | 5+ | 1450 | взрослый 1450 | экскурсия 2 ч + квест-лист | Иоанновский мост, м. Горьковская | piterd.ru/petropavlovka | да</div>
+        <p class="note" style="margin-top:12px">Сейчас у 8 программ из 51 нет цены, у части нет адреса сбора — это и есть основная работа по листу.</p>
+      </div>
+    </details>
+
+    <!-- лист 2 -->
+    <details class="doc">
+      <summary>
+        <b>Лист 2 · Расписание</b>
+        <span class="cols">Дата · Время · Экскурсия · Мест осталось · Статус · Ссылка на запись</span>
+      </summary>
+      <div class="docbody">
+        <table>
+          <thead><tr><th>Колонка</th><th>Что писать</th><th>Кто</th></tr></thead>
+          <tbody>
+            <tr><td>Дата и время</td><td>28.10.2026, 11.00</td><td>тянется с сайта</td></tr>
+            <tr><td>Экскурсия</td><td>название из листа 1</td><td>тянется с сайта</td></tr>
+            <tr><td>Мест осталось</td><td>числом — бот скажет «осталось 6 мест»</td><td>вы, если считаете</td></tr>
+            <tr><td>Статус</td><td>набор / мест нет / отменена</td><td class="req">вы</td></tr>
+            <tr><td>Ссылка на запись</td><td>на конкретное событие, если через Timepad</td><td class="req">вы</td></tr>
+          </tbody>
+        </table>
+        <div class="ex">28.10.2026 | 11.00 | Петропавловка-квест | 6 | набор | timepad.ru/event/...</div>
+        <p class="note" style="margin-top:12px">Отмену ставить сразу: это единственное место, где час задержки стоит денег — бот успеет записать людей на отменённую дату.</p>
+      </div>
+    </details>
+
+    <!-- лист 3 -->
+    <details class="doc">
+      <summary>
+        <b>Лист 3 · Группы и школы</b>
+        <span class="cols">Экскурсия · Цена по числу детей · Минимум в группе · Сопровождающие · Автобус · Безнал · Срок брони</span>
+      </summary>
+      <div class="docbody">
+        <p class="note">Этого нет ни на сайте, ни в ВК — знают только менеджеры. Без листа бот не соберёт ни одного КП.</p>
+        <table>
+          <thead><tr><th>Колонка</th><th>Что писать</th><th>Обязательно</th></tr></thead>
+          <tbody>
+            <tr><td>Экскурсия</td><td>название из листа 1</td><td class="req">да</td></tr>
+            <tr><td>Цена 15–20 детей</td><td>за одного ребёнка</td><td class="req">да</td></tr>
+            <tr><td>Цена 21–30 детей</td><td>за одного ребёнка</td><td class="req">да</td></tr>
+            <tr><td>Цена 31–40 детей</td><td>за одного ребёнка</td><td>желательно</td></tr>
+            <tr><td>Минимум в группе</td><td>15</td><td class="req">да</td></tr>
+            <tr><td>Сопровождающих бесплатно</td><td>2</td><td class="req">да</td></tr>
+            <tr><td>Автобус</td><td>есть / нет и цена подачи</td><td class="req">да</td></tr>
+            <tr><td>Безнал для школ</td><td>да / нет</td><td class="req">да</td></tr>
+            <tr><td>Бронь за сколько дней</td><td>10</td><td>желательно</td></tr>
+            <tr><td>Питание</td><td>по запросу, 350 ₽</td><td>можно потом</td></tr>
+          </tbody>
+        </table>
+        <div class="ex">Петропавловка-квест | 1300 | 1150 | 1050 | мин. 15 | 2 бесплатно | автобус 12000 | безнал да | бронь за 10 дней</div>
+        <p class="note" style="margin-top:12px">Если считаете иначе — например, фиксированная цена за группу целиком — пришлите как есть, подстрою под вашу логику.</p>
+      </div>
+    </details>
+
+    <!-- лист 4 -->
+    <details class="doc">
+      <summary>
+        <b>Лист 4 · Вопрос — ответ</b>
+        <span class="cols">Вопрос · Ответ вашими словами</span>
+      </summary>
+      <div class="docbody">
+        <p class="note">Семь вопросов обязательны — на них бот отвечает каждый день, и своя формулировка тут дороже красивой:</p>
+        <table>
+          <thead><tr><th>Вопрос</th><th>Почему обязателен</th></tr></thead>
+          <tbody>
+            <tr><td>Как оплатить и можно ли вернуть</td><td>каждый второй диалог</td></tr>
+            <tr><td>Ребёнок заболел — что делать</td><td>чужая формулировка = конфликт</td></tr>
+            <tr><td>Опоздали к началу</td><td>звонят в день экскурсии</td></tr>
+            <tr><td>Родитель идёт с ребёнком — платит?</td><td>влияет на сумму заказа</td></tr>
+            <tr><td>С какого возраста без родителей</td><td>вопрос безопасности</td></tr>
+            <tr><td>Документы для школы</td><td>без ответа класс не бронируют</td></tr>
+            <tr><td>Можно ли фотографировать</td><td>спрашивают постоянно</td></tr>
+          </tbody>
+        </table>
+        <p class="note" style="margin-top:12px">Писать с нуля не нужно: пришлите выгрузку переписки из ВК за месяц — соберу список настоящих вопросов, вам останется проверить ответы.</p>
+        <p class="note">Там же — короткий список запретов: скидки и торг, обещания по погоде, сравнение с конкурентами, споры о возврате. В этих случаях бот молчит и зовёт менеджера.</p>
+      </div>
+    </details>
+
+    <!-- файлы -->
+    <details class="doc">
+      <summary>
+        <b>Папка файлов</b>
+        <span class="cols">Шаблон КП · Прайс для школ · Реквизиты · Договор · Политика обработки данных · Логотип</span>
+      </summary>
+      <div class="docbody">
+        <table>
+          <thead><tr><th>Файл</th><th>Зачем боту</th><th>Обязательно</th></tr></thead>
+          <tbody>
+            <tr><td>Шаблон КП, который шлёте сейчас</td><td>по нему делается автоматический — предложение выглядит как ваше</td><td class="req">да</td></tr>
+            <tr><td>Прайс для школ</td><td>по нему заполню лист 3 сам</td><td class="req">да</td></tr>
+            <tr><td>Реквизиты</td><td>попадают в КП и счета</td><td class="req">да</td></tr>
+            <tr><td>Политика обработки персданных</td><td>без неё нельзя собирать телефоны</td><td class="req">да</td></tr>
+            <tr><td>Договор для школ</td><td>бот отправляет по запросу</td><td>желательно</td></tr>
+            <tr><td>Логотип в хорошем качестве</td><td>в КП и на виджете сайта</td><td>желательно</td></tr>
+          </tbody>
+        </table>
+        <p class="note" style="margin-top:12px">Формат любой: Word, PDF, фотография листа. Перенесу сам.</p>
+      </div>
+    </details>
+
+    <!-- доступы -->
+    <details class="doc">
+      <summary>
+        <b>Доступы</b>
+        <span class="cols">Токен ВК · Тильда · Telegram менеджеров · Timepad</span>
+      </summary>
+      <div class="docbody">
+        <table>
+          <thead><tr><th>Доступ</th><th>Для чего</th></tr></thead>
+          <tbody>
+            <tr><td>Права администратора ВК и токен сообщества</td><td>бот отвечает в сообщениях группы</td></tr>
+            <tr><td>Доступ к Тильде</td><td>вставить код виджета на сайт</td></tr>
+            <tr><td>Telegram менеджеров</td><td>получать заявки и перехватывать диалоги</td></tr>
+            <tr><td>Аккаунт Timepad</td><td>тянуть события и ссылки на запись</td></tr>
+          </tbody>
+        </table>
+        <p class="note" style="margin-top:12px">Пароли не в переписке — приглашением по почте или через менеджер паролей.</p>
+      </div>
+    </details>
+
+    <div class="box acc" style="margin-top:22px">
+      <h3>Минимум, чтобы запустить</h3>
+      <p style="color:var(--ink)">
+        Цены и что входит по 51 программе · цены для групп целиком · семь ответов на частые вопросы ·
+        список запретов · шаблон КП и реквизиты · токен ВК.
+      </p>
+      <p style="margin-top:10px;color:var(--ink)"><b>Вашего времени — 2–3 часа</b>, из них полтора на цены для групп.
+        Один ответственный с именем и телефоном: иначе через месяц в таблице три версии цен.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="up">Главное опасение</div>
+    <h2>Бот не выдумывает цены и даты</h2>
+    <div class="grid g3" style="margin-top:22px">
+      <div class="box"><h3>Факты подставляет программа</h3><p>Цена, дата, адрес и ссылка берутся из таблицы напрямую. Модель формулирует фразу, но не придумывает числа.</p></div>
+      <div class="box"><h3>Проверка перед отправкой</h3><p>Если в ответе цена, которой нет в карточке, сообщение не уходит. Бот переспрашивает или зовёт менеджера.</p></div>
+      <div class="box"><h3>Человек в одно касание</h3><p>Слова «менеджер» и «жалоба», спор о деньгах, три неудачных ответа подряд — диалог уходит человеку, бот замолкает.</p></div>
+    </div>
+    <div class="box soft" style="margin-top:16px">
+      <h3>Данные клиентов остаются в России</h3>
+      <p>Имена, телефоны и заявки хранятся на российском сервере. В языковую модель они не уходят: перед
+        отправкой заменяются на метки, наружу идёт только смысл разговора — «мальчик 7 лет, интересует
+        техника, конец октября». Требование закона выполняется, качество ответов не страдает.</p>
+    </div>
+  </div>
+</section>
+
+<section id="cfg">
+  <div class="wrap">
+    <div class="up">Соберите состав</div>
+    <h2>Что включаем в работу</h2>
+    <p class="lead" style="max-width:640px;margin-top:10px">Отметьте нужное — срок и ежемесячные расходы пересчитаются. Выбор уйдёт вместе с ответами.</p>
+    <div class="cfg" style="margin-top:22px">
+      <div class="grid" style="gap:9px">
+        <label class="opt lock"><input type="checkbox" checked disabled>
+          <span class="t"><b>Ядро и Telegram-бот</b>Диалог от лица компании, подбор из базы, заявки менеджеру</span><span class="d">7 дней</span></label>
+        <label class="opt"><input type="checkbox" class="mod" data-d="3" data-name="ВК" checked>
+          <span class="t"><b>ВК-сообщения</b>Ответы в сообществе, та же база и тот же характер</span><span class="d">3 дня</span></label>
+        <label class="opt"><input type="checkbox" class="mod" data-d="3" data-name="Виджет на сайт" checked>
+          <span class="t"><b>Виджет на сайте</b>Окно чата на piterd.ru, работает с телефона</span><span class="d">3 дня</span></label>
+        <label class="opt"><input type="checkbox" class="mod" data-d="3" data-name="Чистка базы" checked>
+          <span class="t"><b>Чистка и достройка базы</b>Названия, цены, адреса, возраст — по всем 51 программе</span><span class="d">3 дня</span></label>
+        <label class="opt"><input type="checkbox" class="mod" data-d="5" data-name="Группы и КП" checked>
+          <span class="t"><b>Группы и КП в PDF</b>Выясняет условия класса и присылает готовое предложение</span><span class="d">5 дней</span></label>
+        <label class="opt"><input type="checkbox" class="mod" data-d="2" data-name="Оплата" checked>
+          <span class="t"><b>Ссылки на запись</b>Timepad или сайт — на конкретную дату</span><span class="d">2 дня</span></label>
+        <label class="opt"><input type="checkbox" class="mod" data-d="3" data-name="Передача менеджеру" checked>
+          <span class="t"><b>Передача менеджеру</b>Каждый клиент — отдельная тема в Telegram, перехват с телефона</span><span class="d">3 дня</span></label>
+        <label class="opt"><input type="checkbox" class="mod" data-d="2" data-name="Напоминания">
+          <span class="t"><b>Напоминания клиентам</b>За день до экскурсии: адрес, время, что взять</span><span class="d">2 дня</span></label>
+        <label class="opt"><input type="checkbox" class="mod" data-d="2" data-name="Голосовые">
+          <span class="t"><b>Голосовые сообщения</b>Клиент наговаривает — бот понимает</span><span class="d">2 дня</span></label>
+        <label class="opt"><input type="checkbox" class="mod" data-d="7" data-name="Веб-панель">
+          <span class="t"><b>Своя веб-панель</b>История диалогов, загрузка файлов, правка ответов</span><span class="d">7 дней</span></label>
+      </div>
+      <div class="sum">
+        <h3>Итого</h3>
+        <div class="srow"><span>Работы</span><b id="sumDays">—</b></div>
+        <div class="srow"><span>Срок под ключ</span><b id="sumWeeks">—</b></div>
+        <div style="padding:12px 0 2px;font-size:13px">Обращений в месяц: <b id="volLabel">1000</b>
+          <input type="range" class="slider" id="vol" min="100" max="3000" step="100" value="1000"></div>
+        <div class="srow"><span>Сервер в России</span><b>700 ₽</b></div>
+        <div class="srow"><span>Домен</span><b>25 ₽</b></div>
+        <div class="srow"><span>Языковая модель</span><b id="sumAi">—</b></div>
+        <div style="margin-top:12px;font-size:13px">Ежемесячно</div>
+        <div class="big" id="sumMonth">—</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="up">Порядок</div>
+    <h2>Как идёт работа</h2>
+    <div style="margin-top:20px">
+      <div class="step"><span class="n">1</span><div><b>Доступы и аудит</b><span class="s">Токены ВК и Telegram, доступ к Тильде, схема оплаты, таблица данных</span></div><span class="w">2 дня</span></div>
+      <div class="step"><span class="n">2</span><div><b>Ядро и Telegram</b><span class="s">Проверка: 20 тестовых разговоров без единой неверной цены</span></div><span class="w">1 неделя</span></div>
+      <div class="step"><span class="n">3</span><div><b>База знаний</b><span class="s">Все 51 программа с ценой, возрастом, адресом; ответы на 15 частых вопросов</span></div><span class="w">3 дня</span></div>
+      <div class="step"><span class="n">4</span><div><b>ВК и сайт</b><span class="s">Ответ в сообществе за 5 секунд, виджет не тормозит Тильду</span></div><span class="w">1 неделя</span></div>
+      <div class="step"><span class="n">5</span><div><b>Группы и КП</b><span class="s">Разговор учителя заканчивается PDF с верным расчётом на 28 детей</span></div><span class="w">1 неделя</span></div>
+      <div class="step"><span class="n">6</span><div><b>Опытная эксплуатация</b><span class="s">Живые клиенты, разбор мест, где бот тупит, правка формулировок</span></div><span class="w">2 недели</span></div>
+    </div>
+  </div>
+</section>
+
+<section id="form">
+  <div class="wrap">
+    <div class="up">Вопросы</div>
+    <h2>Ответьте — и всё уйдёт одной кнопкой</h2>
+    <p class="lead" style="max-width:620px;margin-top:10px">
+      Четырнадцать вопросов. Без них считать точно нельзя: от ответов зависит и срок,
+      и сколько бот сможет закрывать сам.
+    </p>
+    <div id="quiz" style="margin-top:12px"></div>
+    <div class="send">
+      <div class="sendrow">
+        <button class="btn btn-t" id="sendTg">Отправить в Telegram</button>
+        <button class="btn btn-o" id="copyBtn">Скопировать ответы</button>
+        <span class="note" id="fillState">Отвечено: 0 из 14</span>
+      </div>
+      <p class="note" style="margin-top:10px">
+        Кнопка откроет Telegram с готовым текстом — останется нажать «Отправить».
+        Если Telegram не открылся, нажмите «Скопировать» и вставьте сообщение вручную.
+      </p>
+    </div>
+  </div>
+</section>
+
+<footer><div class="wrap">Предложение по чат-боту для «Это Питер Деткам» · piterd.ru · сентябрь 2026</div></footer>
+<div class="toast" id="toast"></div>
+
+<script>
+const TG_USERNAME = "VH220";
+
+const DEMOS = {
+  retail: [
+    ['them','Здравствуйте! Что есть для мальчика 7 лет?'],
+    ['me','Здравствуйте! Для 7 лет подходит 34 программы из 51. Что ему ближе — техника и наука, животные, история или что-то руками?'],
+    ['them','Технику любит, конструкторы всякие'],
+    ['me','Тогда три варианта:\n\nДепо метрополитена 9+ — 3000 ₽\nСпецтехника 2+ — 2500 ₽\nВлюбиться в небо, авиаторы 6+ — 3000 ₽\n\nБлижайшие даты: 4 октября в 11.00 и 12 октября в 12.00'],
+    ['them','Спецтехника, на 4 октября'],
+    ['me','Записываю. Как вас зовут и на какой номер прислать напоминание?'],
+    ['them','Анна, +7 921 ...'],
+    ['me','Готово, Анна. Ссылка на запись: piterd.ru/spectehnika\nПосле оплаты пришлю адрес сбора и что взять с собой'],
+    ['sys','Заявка ушла менеджеру · 1 мин 40 сек'],
+  ],
+  school: [
+    ['them','Здравствуйте, я учитель, нужна экскурсия для 3 класса'],
+    ['me','Здравствуйте! Подберу и сразу пришлю предложение. Сколько детей и сколько сопровождающих?'],
+    ['them','28 детей, 3 взрослых'],
+    ['me','Какие даты рассматриваете и какой бюджет на ребёнка?'],
+    ['them','Конец октября, до 1500'],
+    ['me','Автобус от школы нужен?'],
+    ['them','Да, школа на Просвещения'],
+    ['me','Оплата от школы по безналу или родители собирают?'],
+    ['them','Родители'],
+    ['me','Собрал предложение: 4 программы под 3 класс, цены на 28 детей, с автобусом'],
+    ['file','КП_3класс_28детей_октябрь.pdf'],
+    ['sys','Менеджеру: школа, телефон, все условия · 2 мин'],
+  ]
+};
+const chat = document.getElementById('chat');
+let timers = [], current = 'retail';
+function play(key){
+  timers.forEach(clearTimeout); timers = []; chat.innerHTML = '';
+  DEMOS[key].forEach((m,i)=>timers.push(setTimeout(()=>{
+    const d = document.createElement('div');
+    d.className = 'msg ' + m[0]; d.textContent = m[1];
+    chat.appendChild(d);
+  }, i*620)));
+}
+document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));
+  t.classList.add('on'); current = t.dataset.demo; play(current);
+});
+document.getElementById('replay').onclick = ()=>play(current);
+play('retail');
+
+const BASE_DAYS = 7, VPS = 700, DOMAIN = 25;
+function plural(n,a,b,c){const m=n%100,k=n%10;if(m>10&&m<20)return c;if(k===1)return a;if(k>=2&&k<=4)return b;return c;}
+function calc(){
+  let days = BASE_DAYS; const picked = [];
+  document.querySelectorAll('.mod').forEach(c=>{ if(c.checked){days += +c.dataset.d; picked.push(c.dataset.name);} });
+  const vol = +document.getElementById('vol').value;
+  const ai = Math.round(vol*0.15/10)*10;
+  const weeks = Math.ceil(days/5*1.25);
+  document.getElementById('sumDays').textContent = days + ' ' + plural(days,'день','дня','дней');
+  document.getElementById('sumWeeks').textContent = weeks + ' ' + plural(weeks,'неделя','недели','недель');
+  document.getElementById('volLabel').textContent = vol;
+  document.getElementById('sumAi').textContent = ai + ' ₽';
+  document.getElementById('sumMonth').textContent = (VPS+DOMAIN+ai) + ' ₽';
+  return {days, weeks, picked, vol, month: VPS+DOMAIN+ai};
+}
+document.querySelectorAll('.mod').forEach(c=>c.onchange=calc);
+document.getElementById('vol').oninput = calc;
+calc();
+
+const QUESTIONS = [
+  {id:'channels', t:'Где бот нужен в первую очередь?', hint:'можно несколько', multi:true, o:['ВК-сообщения','Виджет на сайте','Telegram','Авито','WhatsApp']},
+  {id:'volume', t:'Сколько обращений приходит в месяц?', o:['до 100','100–300','300–1000','больше 1000','не считали']},
+  {id:'pay', t:'Как сейчас принимаете оплату?', hint:'можно несколько', multi:true, o:['Timepad','Через сайт','Счёт от менеджера','Наличные на месте','Перевод на карту']},
+  {id:'crm', t:'Есть ли CRM?', o:['Нет','amoCRM','Битрикс24','Таблица Excel или Google','Другое']},
+  {id:'prices', t:'Может ли бот сам называть цены и доводить до записи?', o:['Да, полностью','Да, кроме групп и школ','Нет, только соединять с менеджером']},
+  {id:'hours', t:'Когда бот должен отвечать?', o:['Круглосуточно','Только в рабочие часы','Круглосуточно, но ночью без цен']},
+  {id:'school', t:'Прайс и КП для школ — в каком виде существуют?', o:['Есть готовый файл','Есть, но разрозненно','Только в голове у менеджеров','Нет вообще']},
+  {id:'managers', t:'Сколько менеджеров будет работать с заявками?', o:['Один','Двое-трое','Больше трёх']},
+  {id:'legal', t:'От какого лица работаете?', o:['ИП','ООО','И то, и другое']},
+  {id:'rkn', t:'Уведомление в Роскомнадзор об обработке персданных подано?', o:['Да','Нет','Не знаю']},
+  {id:'start', t:'Когда хотите запустить?', o:['Как можно скорее','В течение месяца','К школьному сезону','Пока изучаем']},
+  {id:'owner', t:'Кто отвечает за данные — имя и контакт?', type:'text', ph:'Например: Мария, +7 921 ...'},
+  {id:'forbid', t:'Что боту запрещено делать или говорить?', type:'area', ph:'Скидки, обещания по погоде, сравнение с конкурентами, что-то ещё'},
+  {id:'contact', t:'Как с вами связаться по проекту?', type:'text', ph:'Имя, телефон или Telegram'},
+];
+const answers = {}, quiz = document.getElementById('quiz');
+QUESTIONS.forEach(q=>{
+  const box = document.createElement('div'); box.className = 'q';
+  const label = document.createElement('span'); label.className = 'qt';
+  label.innerHTML = q.t + (q.hint ? ' <em>· ' + q.hint + '</em>' : '');
+  box.appendChild(label);
+  if(q.type){
+    const el = document.createElement(q.type === 'area' ? 'textarea' : 'input');
+    if(q.type === 'area') el.rows = 3; else el.type = 'text';
+    el.placeholder = q.ph || '';
+    el.oninput = ()=>{ answers[q.id] = el.value.trim(); state(); };
+    box.appendChild(el);
+  } else {
+    const chips = document.createElement('div'); chips.className = 'chips';
+    q.o.forEach(opt=>{
+      const b = document.createElement('button');
+      b.className = 'chip'; b.type = 'button'; b.textContent = opt;
+      b.onclick = ()=>{
+        if(q.multi){
+          b.classList.toggle('on');
+          answers[q.id] = [...chips.querySelectorAll('.chip.on')].map(x=>x.textContent).join(', ');
+        } else {
+          chips.querySelectorAll('.chip').forEach(x=>x.classList.remove('on'));
+          b.classList.add('on'); answers[q.id] = opt;
+        }
+        if(!answers[q.id]) delete answers[q.id];
+        state();
+      };
+      chips.appendChild(b);
+    });
+    box.appendChild(chips);
+  }
+  quiz.appendChild(box);
+});
+function state(){
+  const n = Object.keys(answers).filter(k=>answers[k]).length;
+  document.getElementById('fillState').textContent = 'Отвечено: ' + n + ' из ' + QUESTIONS.length;
+}
+function buildText(){
+  const c = calc(), lines = ['Это Питер Деткам — ответы по чат-боту',''];
+  QUESTIONS.forEach(q=>{ if(answers[q.id]) lines.push('• ' + q.t + ' — ' + answers[q.id]); });
+  lines.push('', 'Состав: ядро и Telegram' + (c.picked.length ? ', ' + c.picked.join(', ') : ''),
+    'Срок: ' + c.days + ' дн. (~' + c.weeks + ' нед.)',
+    'Расходы: ~' + c.month + ' ₽/мес при ' + c.vol + ' обращениях');
+  return lines.join('\n');
+}
+function toast(m){
+  const t = document.getElementById('toast');
+  t.textContent = m; t.classList.add('on');
+  setTimeout(()=>t.classList.remove('on'), 2600);
+}
+document.getElementById('sendTg').onclick = ()=>{
+  if(!Object.keys(answers).filter(k=>answers[k]).length){ toast('Ответьте хотя бы на пару вопросов'); return; }
+  const text = buildText();
+  if(navigator.clipboard) navigator.clipboard.writeText(text).catch(()=>{});
+  const url = TG_USERNAME
+    ? 'https://t.me/' + TG_USERNAME + '?text=' + encodeURIComponent(text)
+    : 'https://t.me/share/url?url=' + encodeURIComponent(text);
+  window.open(url, '_blank');
+  toast('Telegram открыт, текст также скопирован');
+};
+document.getElementById('copyBtn').onclick = ()=>{
+  const text = buildText();
+  navigator.clipboard.writeText(text).then(()=>toast('Ответы скопированы')).catch(()=>{
+    const ta = document.createElement('textarea'); ta.value = text;
+    document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove();
+    toast('Ответы скопированы');
+  });
+};
+</script>
+</body>
+</html>
