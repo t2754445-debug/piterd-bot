@@ -3,3 +3,5 @@
 .playwright-mcp/
 make_template.py
 Шаблон-данные-ЭПД.xlsx
+fill_template.py
+Данные-ЭПД-черновик.xlsx
