@@ -7,7 +7,7 @@
 <meta name="description" content="Бот отвечает в ВК, на сайте и в Telegram, подбирает экскурсию, доводит до записи и собирает КП для школьного класса. Что нужно от компании, сроки и смета.">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Чат-бот-продавец для «Это Питер Деткам»">
-<meta property="og:description" content="Отвечает в ВК, на сайте и в Telegram от лица компании. Подбирает экскурсию из 51 программы, доводит до записи, собирает КП для класса. Смета ~900 ₽/мес, срок 5–6 недель.">
+<meta property="og:description" content="Отвечает в ВК, на сайте и в Telegram от лица компании. Подбирает экскурсию из 51 программы, доводит до записи, собирает КП для класса. Смета ~900 ₽/мес, срок 3–4 недели.">
 <meta property="og:image" content="https://t2754445-debug.github.io/piterd-bot/og.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -319,6 +319,31 @@ footer{padding:26px 0 44px;font-size:12.5px;color:var(--ink-2)}
         <div class="btns"><a class="btn btn-t" href="#demo">Записаться</a><a class="btn btn-g" href="#demo">Заказать для класса</a></div>
       </div>
     </div>
+
+    <h3 style="margin-top:36px">Одна карточка — три канала</h3>
+    <div class="grid g3" style="margin-top:14px">
+      <div class="box">
+        <h3>В ВК</h3>
+        <p>ВК умеет показывать карточки лентой: фото, заголовок, описание и кнопки под ним — их можно листать вбок.
+          Бот отправляет до десяти программ одним сообщением. Фото загружаются в ВК один раз, дальше
+          отправляются мгновенно по внутреннему номеру.</p>
+      </div>
+      <div class="box">
+        <h3>На сайте</h3>
+        <p>Виджет рисуем сами — то есть карточка в чате выглядит ровно как на странице сайта:
+          та же вёрстка, тот же шрифт, те же кнопки «Записаться» и «Заказать для класса».
+          Нажатие ведёт на страницу записи.</p>
+      </div>
+      <div class="box">
+        <h3>В Telegram</h3>
+        <p>Фото с подписью и кнопки под сообщением. Работает уже сейчас — бот для менеджеров так и показывает
+          экскурсии. Для клиентов меняется только манера разговора.</p>
+      </div>
+    </div>
+    <p class="note" style="margin-top:14px">
+      Текст ответа, набор программ и кнопки бот собирает один раз, а дальше каждый канал показывает их
+      по-своему. Поэтому новый канал — это не новый бот, а ещё один способ отрисовки.
+    </p>
   </div>
 </section>
 
@@ -555,12 +580,28 @@ footer{padding:26px 0 44px;font-size:12.5px;color:var(--ink-2)}
       <div class="box"><h3>Проверка перед отправкой</h3><p>Если в ответе цена, которой нет в карточке, сообщение не уходит. Бот переспрашивает или зовёт менеджера.</p></div>
       <div class="box"><h3>Человек в одно касание</h3><p>Слова «менеджер» и «жалоба», спор о деньгах, три неудачных ответа подряд — диалог уходит человеку, бот замолкает.</p></div>
     </div>
-    <div class="box soft" style="margin-top:16px">
-      <h3>Данные клиентов остаются в России</h3>
-      <p>Имена, телефоны и заявки хранятся на российском сервере. В языковую модель они не уходят: перед
-        отправкой заменяются на метки, наружу идёт только смысл разговора — «мальчик 7 лет, интересует
-        техника, конец октября». Требование закона выполняется, качество ответов не страдает.</p>
+    <h3 style="margin-top:40px">Где хранятся данные по каждому клиенту</h3>
+    <div class="tablewrap" style="margin-top:14px">
+      <table class="docs">
+        <thead><tr><th>Что</th><th>Где лежит</th><th>Кто видит</th></tr></thead>
+        <tbody>
+          <tr><td><b>Имя, телефон, город</b></td><td>база на вашем сервере в России</td><td>менеджеры</td></tr>
+          <tr><td><b>Вся переписка с ботом</b></td><td>там же, по каждому клиенту отдельной веткой</td><td>менеджеры</td></tr>
+          <tr><td><b>Заявки и записи</b></td><td>там же, плюс дублируются менеджеру в Telegram</td><td>менеджеры</td></tr>
+          <tr><td><b>Что смотрел и что выбрал</b></td><td>там же — из этого собирается статистика и напоминания</td><td>руководитель</td></tr>
+          <tr><td><b>Текст разговора для языковой модели</b></td><td>уходит обезличенным: вместо имени и телефона метки</td><td>—</td></tr>
+        </tbody>
+      </table>
     </div>
+    <div class="grid g3" style="margin-top:16px">
+      <div class="box soft"><h3>Сервер ваш</h3><p>Арендуется на компанию, доступ только у вас и у разработчика. Съехать к другому подрядчику можно с базой целиком — ничего не заперто в чужом сервисе.</p></div>
+      <div class="box soft"><h3>Копии каждый день</h3><p>Автоматический бэкап базы. Сломался сервер — поднимается на новом за час, переписка и заявки на месте.</p></div>
+      <div class="box soft"><h3>По закону</h3><p>Персональные данные на российском сервере, согласие при первом сообщении, удаление по запросу клиента. Уведомление в Роскомнадзор подаётся один раз, бесплатно.</p></div>
+    </div>
+    <p class="note" style="margin-top:14px">
+      Переписка в ВК и Telegram остаётся ещё и на их серверах — это работает так для любого чата, не только бота.
+      Ваш сервер — единственное место, где все каналы сходятся в одну историю по клиенту.
+    </p>
   </div>
 </section>
 
@@ -572,29 +613,30 @@ footer{padding:26px 0 44px;font-size:12.5px;color:var(--ink-2)}
     <div class="cfg" style="margin-top:22px">
       <div class="grid" style="gap:9px">
         <label class="opt lock"><input type="checkbox" checked disabled>
-          <span class="t"><b>Ядро и Telegram-бот</b>Диалог от лица компании, подбор из базы, заявки менеджеру</span><span class="d">7 дней</span></label>
-        <label class="opt"><input type="checkbox" class="mod" data-d="3" data-name="ВК" checked>
-          <span class="t"><b>ВК-сообщения</b>Ответы в сообществе, та же база и тот же характер</span><span class="d">3 дня</span></label>
-        <label class="opt"><input type="checkbox" class="mod" data-d="3" data-name="Виджет на сайт" checked>
-          <span class="t"><b>Виджет на сайте</b>Окно чата на piterd.ru, работает с телефона</span><span class="d">3 дня</span></label>
-        <label class="opt"><input type="checkbox" class="mod" data-d="3" data-name="Чистка базы" checked>
-          <span class="t"><b>Чистка и достройка базы</b>Названия, цены, адреса, возраст — по всем 51 программе</span><span class="d">3 дня</span></label>
-        <label class="opt"><input type="checkbox" class="mod" data-d="5" data-name="Группы и КП" checked>
-          <span class="t"><b>Группы и КП в PDF</b>Выясняет условия класса и присылает готовое предложение</span><span class="d">5 дней</span></label>
-        <label class="opt"><input type="checkbox" class="mod" data-d="2" data-name="Оплата" checked>
-          <span class="t"><b>Ссылки на запись</b>Timepad или сайт — на конкретную дату</span><span class="d">2 дня</span></label>
-        <label class="opt"><input type="checkbox" class="mod" data-d="3" data-name="Передача менеджеру" checked>
-          <span class="t"><b>Передача менеджеру</b>Каждый клиент — отдельная тема в Telegram, перехват с телефона</span><span class="d">3 дня</span></label>
-        <label class="opt"><input type="checkbox" class="mod" data-d="2" data-name="Напоминания">
-          <span class="t"><b>Напоминания клиентам</b>За день до экскурсии: адрес, время, что взять</span><span class="d">2 дня</span></label>
-        <label class="opt"><input type="checkbox" class="mod" data-d="2" data-name="Голосовые">
-          <span class="t"><b>Голосовые сообщения</b>Клиент наговаривает — бот понимает</span><span class="d">2 дня</span></label>
-        <label class="opt"><input type="checkbox" class="mod" data-d="7" data-name="Веб-панель">
-          <span class="t"><b>Своя веб-панель</b>История диалогов, загрузка файлов, правка ответов</span><span class="d">7 дней</span></label>
+          <span class="t"><b>Ядро и Telegram-бот</b>Диалог от лица компании, подбор из базы, заявки менеджеру</span><span class="d">3 дня</span></label>
+        <label class="opt"><input type="checkbox" class="mod" data-d="1" data-name="ВК" checked>
+          <span class="t"><b>ВК-сообщения</b>Ответы в сообществе, та же база и тот же характер</span><span class="d">1 день</span></label>
+        <label class="opt"><input type="checkbox" class="mod" data-d="1" data-name="Виджет на сайт" checked>
+          <span class="t"><b>Виджет на сайте</b>Окно чата на piterd.ru, работает с телефона</span><span class="d">1 день</span></label>
+        <label class="opt"><input type="checkbox" class="mod" data-d="1" data-name="Чистка базы" checked>
+          <span class="t"><b>Чистка и достройка базы</b>Названия, цены, адреса, возраст — по всем 51 программе</span><span class="d">1 день</span></label>
+        <label class="opt"><input type="checkbox" class="mod" data-d="2" data-name="Группы и КП" checked>
+          <span class="t"><b>Группы и КП в PDF</b>Выясняет условия класса и присылает готовое предложение</span><span class="d">2 дня</span></label>
+        <label class="opt"><input type="checkbox" class="mod" data-d="1" data-name="Оплата" checked>
+          <span class="t"><b>Ссылки на запись</b>Timepad или сайт — на конкретную дату</span><span class="d">1 день</span></label>
+        <label class="opt"><input type="checkbox" class="mod" data-d="1" data-name="Передача менеджеру" checked>
+          <span class="t"><b>Передача менеджеру</b>Каждый клиент — отдельная тема в Telegram, перехват с телефона</span><span class="d">1 день</span></label>
+        <label class="opt"><input type="checkbox" class="mod" data-d="1" data-name="Напоминания">
+          <span class="t"><b>Напоминания клиентам</b>За день до экскурсии: адрес, время, что взять</span><span class="d">1 день</span></label>
+        <label class="opt"><input type="checkbox" class="mod" data-d="1" data-name="Голосовые">
+          <span class="t"><b>Голосовые сообщения</b>Клиент наговаривает — бот понимает</span><span class="d">1 день</span></label>
+        <label class="opt"><input type="checkbox" class="mod" data-d="3" data-name="Веб-панель">
+          <span class="t"><b>Своя веб-панель</b>История диалогов, загрузка файлов, правка ответов</span><span class="d">3 дня</span></label>
       </div>
       <div class="sum">
         <h3>Итого</h3>
         <div class="srow"><span>Работы</span><b id="sumDays">—</b></div>
+        <div class="srow"><span>Тест на живых клиентах</span><b>2 недели</b></div>
         <div class="srow"><span>Срок под ключ</span><b id="sumWeeks">—</b></div>
         <div style="padding:12px 0 2px;font-size:13px">Обращений в месяц: <b id="volLabel">1000</b>
           <input type="range" class="slider" id="vol" min="100" max="3000" step="100" value="1000"></div>
@@ -612,12 +654,13 @@ footer{padding:26px 0 44px;font-size:12.5px;color:var(--ink-2)}
   <div class="wrap">
     <div class="up">Порядок</div>
     <h2>Как идёт работа</h2>
+    <p class="lead" style="max-width:660px;margin-top:10px">Разработка — 9 рабочих дней: база, парсеры и подбор уже написаны, заново делается только то, что смотрит на клиента. Дольше всего идёт не код, а тест на живых людях.</p>
     <div style="margin-top:20px">
-      <div class="step"><span class="n">1</span><div><b>Доступы и аудит</b><span class="s">Токены ВК и Telegram, доступ к Тильде, схема оплаты, таблица данных</span></div><span class="w">2 дня</span></div>
-      <div class="step"><span class="n">2</span><div><b>Ядро и Telegram</b><span class="s">Проверка: 20 тестовых разговоров без единой неверной цены</span></div><span class="w">1 неделя</span></div>
-      <div class="step"><span class="n">3</span><div><b>База знаний</b><span class="s">Все 51 программа с ценой, возрастом, адресом; ответы на 15 частых вопросов</span></div><span class="w">3 дня</span></div>
-      <div class="step"><span class="n">4</span><div><b>ВК и сайт</b><span class="s">Ответ в сообществе за 5 секунд, виджет не тормозит Тильду</span></div><span class="w">1 неделя</span></div>
-      <div class="step"><span class="n">5</span><div><b>Группы и КП</b><span class="s">Разговор учителя заканчивается PDF с верным расчётом на 28 детей</span></div><span class="w">1 неделя</span></div>
+      <div class="step"><span class="n">1</span><div><b>Доступы и аудит</b><span class="s">Токены ВК и Telegram, доступ к Тильде, схема оплаты, таблица данных</span></div><span class="w">1 день</span></div>
+      <div class="step"><span class="n">2</span><div><b>Ядро и Telegram</b><span class="s">Проверка: 20 тестовых разговоров без единой неверной цены</span></div><span class="w">3 дня</span></div>
+      <div class="step"><span class="n">3</span><div><b>База знаний</b><span class="s">Все 51 программа с ценой, возрастом, адресом; ответы на 15 частых вопросов</span></div><span class="w">1 день</span></div>
+      <div class="step"><span class="n">4</span><div><b>ВК и сайт</b><span class="s">Ответ в сообществе за 5 секунд, виджет не тормозит Тильду</span></div><span class="w">2 дня</span></div>
+      <div class="step"><span class="n">5</span><div><b>Группы и КП</b><span class="s">Разговор учителя заканчивается PDF с верным расчётом на 28 детей</span></div><span class="w">2 дня</span></div>
       <div class="step"><span class="n">6</span><div><b>Опытная эксплуатация</b><span class="s">Живые клиенты, разбор мест, где бот тупит, правка формулировок</span></div><span class="w">2 недели</span></div>
     </div>
   </div>
@@ -701,14 +744,14 @@ document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{
 document.getElementById('replay').onclick = ()=>play(current);
 play('retail');
 
-const BASE_DAYS = 7, VPS = 700, DOMAIN = 25;
+const BASE_DAYS = 3, VPS = 700, DOMAIN = 25;
 function plural(n,a,b,c){const m=n%100,k=n%10;if(m>10&&m<20)return c;if(k===1)return a;if(k>=2&&k<=4)return b;return c;}
 function calc(){
   let days = BASE_DAYS; const picked = [];
   document.querySelectorAll('.mod').forEach(c=>{ if(c.checked){days += +c.dataset.d; picked.push(c.dataset.name);} });
   const vol = +document.getElementById('vol').value;
   const ai = Math.round(vol*0.15/10)*10;
-  const weeks = Math.ceil(days/5*1.25);
+  const weeks = Math.ceil(days/5) + 2;   // +2 недели на тест и отладку
   document.getElementById('sumDays').textContent = days + ' ' + plural(days,'день','дня','дней');
   document.getElementById('sumWeeks').textContent = weeks + ' ' + plural(weeks,'неделя','недели','недель');
   document.getElementById('volLabel').textContent = vol;
